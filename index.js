@@ -1,8 +1,17 @@
 const express = require('express');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const app = express();
 const port = 3000;
+
+
+// Configuration 
+cloudinary.config({
+  cloud_name: "",
+  api_key: "",
+  api_secret: ""
+});
 
 
 app.get('/', (req, res) => {
@@ -41,7 +50,10 @@ const storage = multer.diskStorage({
   });
   
   app.post('/upload', upload.single('file'), (req, res) => {
-    res.send('File uploaded successfully');
+    res.send('Multer File uploaded successfully');
+    cloudinary.uploader.upload(req.file.path, function(error, result) {
+      console.log(result.url, error)
+    });
   });
 
 app.listen(port, () => {
