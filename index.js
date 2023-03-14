@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const app = express();
 const port = 3000;
 
@@ -16,10 +17,20 @@ app.post('/upload', (req, res) => {
             cb(null, 'uploads/')
         },
         filename: function (req, file, cb) {
-            cb(null, file.originalname + '-' + Date.now() + '.jpg')
+            cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
         }
     });
-    const upload = multer({ storage: storage }).single('user_image');
+    const upload = multer({ 
+        storage: storage,
+        fileFilter: function (req, file, cb) {
+            if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+                cb(null, true)
+            } else {
+                cb(null, false)
+                return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+            }
+        }
+    }).single('user_image');
     upload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
             return res.status(500).json(err)
